@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+# Kitchen Table Crusade
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Kitchen Table Crusade is a lightweight improvised battlefield generator for sci-fi tabletop play.
+It creates a complete original mission card using local, deterministic templates and household terrain substitutions.
 
-Currently, two official plugins are available:
+## Why this exists
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Not everyone has dedicated terrain. This prototype helps players quickly set up a playable mission using common objects at home while keeping the experience fun, clear, and printable.
 
-## React Compiler
+## MVP features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React + Vite + TypeScript frontend (no backend)
+- Input controls for game size, army names, tone, and available household objects
+- Deterministic mission generation from typed local data tables
+- Original narrative briefing (Serious / Epic / Ridiculous tones)
+- SVG top-down battlefield map with:
+  - deployment zones
+  - objective markers
+  - terrain placements
+  - coordinate/legend block
+- Terrain substitution list mapping tabletop terrain to household items
+- Print-friendly mission card via browser print styles
+- Automatic save/load of the last generated mission from `localStorage`
 
-## Expanding the ESLint configuration
+## Tech stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React
+- Vite
+- TypeScript
+- CSS
+- SVG rendering
+- Local JSON/TS data tables
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Project structure
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+src/
+  components/
+  data/
+  engine/
+  types/
+  utils/
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Setup
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+## Run locally
+
+```bash
+npm run dev
+```
+
+Open the local URL shown in terminal (default Vite URL).
+
+## Build
+
+```bash
+npm run build
+```
+
+## How to print a mission card
+
+1. Generate a mission.
+2. Click `Print-Friendly Mission Card`.
+3. In the print dialog, print or save as PDF.
+
+The print stylesheet hides input controls and focuses on the mission content.
+
+## Roadmap (post-MVP)
+
+- Multiple board sizes and layout presets
+- Export to dedicated PDF layout
+- Additional narrative packs and mission modules
+- Optional seed sharing for reproducible missions
+- Better mobile polish
+
+## Legal / content note
+
+Kitchen Table Crusade generates original mission text and is not affiliated with, endorsed by, or connected to Games Workshop.

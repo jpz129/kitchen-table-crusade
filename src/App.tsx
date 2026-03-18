@@ -1,120 +1,88 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useMemo, useState } from 'react'
+import { InputPanel } from './components/InputPanel'
+import { MissionCard } from './components/MissionCard'
+import { defaultInputs } from './data/defaults'
+import { householdOptions } from './data/substitutions'
+import { generateMission } from './engine/generateMission'
+import type { UserInputs } from './types/mission'
+import { loadLastMission, saveLastMission } from './utils/storage'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [inputs, setInputs] = useState<UserInputs>(defaultInputs)
+  const [mission, setMission] = useState(() => loadLastMission())
+
+  useEffect(() => {
+    if (mission) {
+      saveLastMission(mission)
+    }
+  }, [mission])
+
+  useEffect(() => {
+    if (mission?.inputsUsed) {
+      setInputs(mission.inputsUsed)
+    }
+  }, [mission])
+
+  const subtitle = useMemo(
+    () => 'Improvised battlefield generator for sci-fi tabletop play.',
+    [],
+  )
+
+  const handleGenerate = (nextInputs = inputs) => {
+    setMission(generateMission(nextInputs))
+  }
+
+  const handleRandomize = () => {
+    const randomCount = Math.floor(Math.random() * 4) + 2
+    const randomTerrain = [...householdOptions].sort(() => 0.5 - Math.random()).slice(0, randomCount)
+    const randomInputs: UserInputs = {
+      gameSize: [500, 1000, 2000][Math.floor(Math.random() * 3)] as UserInputs['gameSize'],
+      tone: ['Serious', 'Epic', 'Ridiculous'][Math.floor(Math.random() * 3)] as UserInputs['tone'],
+      army1: '',
+      army2: '',
+      householdTerrain: randomTerrain,
+    }
+    setInputs(randomInputs)
+    handleGenerate(randomInputs)
+  }
+
+  const handleReset = () => {
+    setInputs(defaultInputs)
+    setMission(null)
+    window.localStorage.removeItem('ktc:lastMission')
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-shell">
+      <header className="app-header">
+        <h1>Kitchen Table Crusade</h1>
+        <p>{subtitle}</p>
+      </header>
 
-      <div className="ticks"></div>
+      <main className="layout">
+        <InputPanel
+          inputs={inputs}
+          onChange={setInputs}
+          onGenerate={() => handleGenerate()}
+          onRandomize={handleRandomize}
+          onReset={handleReset}
+        />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="output-panel">
+          {mission ? (
+            <MissionCard mission={mission} />
+          ) : (
+            <section className="empty-state">
+              <h2>No mission generated yet</h2>
+              <p>
+                Choose your inputs and click <strong>Generate Mission</strong> to build an original mission card.
+              </p>
+            </section>
+          )}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      </main>
+    </div>
   )
 }
 
