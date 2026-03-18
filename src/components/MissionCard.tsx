@@ -9,7 +9,12 @@ interface MissionCardProps {
 export const MissionCard = ({ mission }: MissionCardProps) => (
   <section className="mission-card" id="mission-card">
     <div className="mission-header">
-      <h2>{mission.title}</h2>
+      <div>
+        <h2>{mission.title}</h2>
+        <p className="source-label">
+          Narrative source: {mission.narrativeSource === 'llm' ? 'OpenAI-enhanced' : 'Template fallback'}
+        </p>
+      </div>
       <button type="button" className="print-btn" onClick={() => window.print()}>
         Print-Friendly Mission Card
       </button>

@@ -127,6 +127,7 @@ export interface Mission {
   }
   substitutions: TerrainSubstitution[]
   narrative: string
+  narrativeSource: 'template' | 'llm'
   inputsUsed: UserInputs
   timestamp: string
 }

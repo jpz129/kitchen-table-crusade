@@ -126,6 +126,7 @@ export const generateMission = (rawInputs: UserInputs): Mission => {
     },
     substitutions,
     narrative,
+    narrativeSource: 'template',
     inputsUsed: {
       ...inputsUsed,
       army1,

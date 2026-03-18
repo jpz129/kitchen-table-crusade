@@ -3,6 +3,7 @@ import { InputPanel } from './components/InputPanel'
 import { MissionCard } from './components/MissionCard'
 import { defaultInputs } from './data/defaults'
 import { householdOptions } from './data/substitutions'
+import { enhanceNarrativeWithLlm } from './engine/enhanceNarrativeWithLlm'
 import { generateMission } from './engine/generateMission'
 import type { UserInputs } from './types/mission'
 import { loadLastMission, saveLastMission } from './utils/storage'
@@ -11,6 +12,8 @@ import './App.css'
 function App() {
   const [inputs, setInputs] = useState<UserInputs>(defaultInputs)
   const [mission, setMission] = useState(() => loadLastMission())
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generationError, setGenerationError] = useState<string | null>(null)
 
   useEffect(() => {
     if (mission) {
@@ -29,8 +32,24 @@ function App() {
     [],
   )
 
-  const handleGenerate = (nextInputs = inputs) => {
-    setMission(generateMission(nextInputs))
+  const handleGenerate = async (nextInputs = inputs) => {
+    setGenerationError(null)
+    setIsGenerating(true)
+    const templateMission = generateMission(nextInputs)
+    setMission(templateMission)
+
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY?.trim()
+    if (apiKey) {
+      try {
+        const llmNarrative = await enhanceNarrativeWithLlm(templateMission, apiKey)
+        if (llmNarrative) {
+          setMission({ ...templateMission, ...llmNarrative })
+        }
+      } catch {
+        setGenerationError('OpenAI enhancement failed. Using deterministic narrative fallback.')
+      }
+    }
+    setIsGenerating(false)
   }
 
   const handleRandomize = () => {
@@ -44,7 +63,7 @@ function App() {
       householdTerrain: randomTerrain,
     }
     setInputs(randomInputs)
-    handleGenerate(randomInputs)
+    void handleGenerate(randomInputs)
   }
 
   const handleReset = () => {
@@ -64,12 +83,17 @@ function App() {
         <InputPanel
           inputs={inputs}
           onChange={setInputs}
-          onGenerate={() => handleGenerate()}
+          onGenerate={() => void handleGenerate()}
           onRandomize={handleRandomize}
           onReset={handleReset}
         />
 
         <div className="output-panel">
+          {isGenerating && (
+            <p className="status-banner">Generating mission...</p>
+          )}
+          {generationError && <p className="error-banner">{generationError}</p>}
+
           {mission ? (
             <MissionCard mission={mission} />
           ) : (

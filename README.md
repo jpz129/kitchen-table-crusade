@@ -21,6 +21,7 @@ Not everyone has dedicated terrain. This prototype helps players quickly set up 
 - Terrain substitution list mapping tabletop terrain to household items
 - Print-friendly mission card via browser print styles
 - Automatic save/load of the last generated mission from `localStorage`
+- Optional OpenAI narrative enhancement with deterministic fallback
 
 ## Tech stack
 
@@ -47,6 +48,22 @@ src/
 ```bash
 npm install
 ```
+
+## Optional OpenAI setup
+
+Create a local env file (not committed):
+
+```bash
+cp .env.example .env.local
+```
+
+Then set:
+
+```bash
+VITE_OPENAI_API_KEY=your_openai_api_key_here
+```
+
+If the key is not set or the API request fails, the app automatically uses deterministic template narrative generation.
 
 ## Run locally
 
