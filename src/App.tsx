@@ -3,8 +3,8 @@ import { InputPanel } from './components/InputPanel'
 import { MissionCard } from './components/MissionCard'
 import { defaultInputs } from './data/defaults'
 import { householdOptions } from './data/substitutions'
-import { enhanceNarrativeWithLlm } from './engine/enhanceNarrativeWithLlm'
 import { generateMission } from './engine/generateMission'
+import { generateMissionWithLlm } from './engine/generateMissionWithLlm'
 import type { UserInputs } from './types/mission'
 import { loadLastMission, saveLastMission } from './utils/storage'
 import './App.css'
@@ -35,20 +35,24 @@ function App() {
   const handleGenerate = async (nextInputs = inputs) => {
     setGenerationError(null)
     setIsGenerating(true)
-    const templateMission = generateMission(nextInputs)
-    setMission(templateMission)
 
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY?.trim()
+
     if (apiKey) {
       try {
-        const llmNarrative = await enhanceNarrativeWithLlm(templateMission, apiKey)
-        if (llmNarrative) {
-          setMission({ ...templateMission, ...llmNarrative })
+        const llmMission = await generateMissionWithLlm(nextInputs, apiKey)
+        if (llmMission) {
+          setMission(llmMission)
+          setIsGenerating(false)
+          return
         }
+        setGenerationError('OpenAI generation failed — using deterministic fallback.')
       } catch {
-        setGenerationError('OpenAI enhancement failed. Using deterministic narrative fallback.')
+        setGenerationError('OpenAI request error — using deterministic fallback.')
       }
     }
+
+    setMission(generateMission(nextInputs))
     setIsGenerating(false)
   }
 
